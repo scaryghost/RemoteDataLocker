@@ -1,8 +1,21 @@
 apply plugin: 'java'
 apply plugin: 'application'
 
+def camelVersion= "2.16.0"
 mainClassName= "com.github.scaryghost.remotedatalocker.Application"
 
 repositories {
     jcenter()
+}
+
+dependencies {
+    ['camel-core'].each {
+        compile "org.apache.camel:$it:$camelVersion"
+    }
+    ['camel-jetty'].each {
+        runtime "org.apache.camel:$it:$camelVersion"
+    }
+
+    runtime "org.slf4j:slf4j-simple:1.7.12"
+    runtime "org.xerial:sqlite-jdbc:3.8.11.2"
 }
