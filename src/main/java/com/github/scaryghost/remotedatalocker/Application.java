@@ -30,7 +30,8 @@ public class Application {
             @Override
             public void configure() throws Exception {
                 from("jetty:http://0.0.0.0:8000")
-                        .filter(header(HEADER_ACTION).isEqualTo(ACTION_GET))
+                    .choice()
+                        .when(header(HEADER_ACTION).isEqualTo(ACTION_GET))
                         .doTry()
                         .process((exchange) -> {
                             Message msg = exchange.getIn();
@@ -46,8 +47,8 @@ public class Application {
                                 exchange.getOut().setHeader(Exchange.HTTP_RESPONSE_CODE, 204);
                             }
                         })
-                        .doCatch(SQLException.class).setHeader(Exchange.HTTP_RESPONSE_CODE, constant(500)).end()
-                        .filter(header(HEADER_ACTION).isEqualTo(ACTION_SAVE))
+                        .doCatch(SQLException.class).setHeader(Exchange.HTTP_RESPONSE_CODE, constant(500)).endChoice()
+                        .when(header(HEADER_ACTION).isEqualTo(ACTION_SAVE))
                         .doTry()
                         .process((exchange) -> {
                             Message msg = exchange.getIn();
@@ -64,7 +65,8 @@ public class Application {
 
                             dbConn.commit();
                         })
-                        .doCatch(SQLException.class).setHeader(Exchange.HTTP_RESPONSE_CODE, constant(500)).end()
+                        .doCatch(SQLException.class).setHeader(Exchange.HTTP_RESPONSE_CODE, constant(500)).endChoice()
+                        .otherwise().to("mock:other")
                         .end();
             }
         });
@@ -78,6 +80,8 @@ public class Application {
         Statement stmt = conn.createStatement();
         stmt.setQueryTimeout(30);  // set timeout to 30 sec.
         stmt.executeUpdate("CREATE TABLE IF NOT EXISTS data (key text NOT NULL, value text NOT NULL, PRIMARY KEY (key));");
+
+        conn.commit();
 
         return conn;
     }
