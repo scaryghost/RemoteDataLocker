@@ -13,7 +13,12 @@ public class Application {
     private static final String HEADER_ACTION= "action", ACTION_GET= "get", ACTION_SAVE= "save";
 
     public static void main(String[] args) throws Exception {
-        final Connection dbConn= initDataBase();
+        final ApplicationSettings settings= new ApplicationSettings(args);
+
+        Class.forName(settings.dbDriver());
+        final Connection dbConn= DriverManager.getConnection(settings.dbUrl());
+        initDataBase(dbConn);
+
         final Main camelMain= new Main();
 
         camelMain.enableHangupSupport();
@@ -29,7 +34,7 @@ public class Application {
         camelMain.addRouteBuilder(new RouteBuilder() {
             @Override
             public void configure() throws Exception {
-                from("jetty:http://0.0.0.0:8000")
+                from(String.format("jetty:http://%s:%d", settings.hostname(), settings.port()))
                     .choice()
                         .when(header(HEADER_ACTION).isEqualTo(ACTION_GET))
                         .doTry()
@@ -73,8 +78,7 @@ public class Application {
         camelMain.run();
     }
 
-    private static Connection initDataBase() throws SQLException {
-        Connection conn= DriverManager.getConnection("jdbc:sqlite:datalocker.sqlite");
+    private static void initDataBase(final Connection conn) throws SQLException {
         conn.setAutoCommit(false);
 
         Statement stmt = conn.createStatement();
@@ -82,7 +86,5 @@ public class Application {
         stmt.executeUpdate("CREATE TABLE IF NOT EXISTS data (key text NOT NULL, value text NOT NULL, PRIMARY KEY (key));");
 
         conn.commit();
-
-        return conn;
     }
 }

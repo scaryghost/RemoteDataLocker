@@ -6,8 +6,8 @@ import org.apache.commons.cli.*;
  * Created by etsai on 3/6/2016.
  */
 public class ApplicationSettings {
-    private final static Short DEFAULT_PORT= 8000;
-    private final static String DEFAULT_HOSTNAME= "0.0.0.0", DEFAULT_DB_URL= "jdbc:sqlite:datalocker.sqlite", DEFAULT_DB_DRIVER= "org.sqlite.JDBC";
+    private final static String DEFAULT_PORT= "8000", DEFAULT_HOSTNAME= "0.0.0.0",
+            DEFAULT_DB_URL= "jdbc:sqlite:datalocker.sqlite", DEFAULT_DB_DRIVER= "org.sqlite.JDBC";
 
     private final Short portSetting;
     private final String hostnameSetting, dbDriverSetting, dbUrlSetting;
@@ -21,25 +21,25 @@ public class ApplicationSettings {
 
         CommandLine cmdLine = new DefaultParser().parse( options, args);
 
-        portSetting= Short.parseShort(cmdLine.getOptionValue("p"));
-        hostnameSetting= cmdLine.getOptionValue("hostname");
-        dbUrlSetting= cmdLine.getOptionValue("db-url");
-        dbDriverSetting= cmdLine.getOptionValue("db-driver");
+        portSetting= Short.parseShort(cmdLine.getOptionValue("p", DEFAULT_PORT));
+        hostnameSetting= cmdLine.getOptionValue("hostname", DEFAULT_HOSTNAME);
+        dbUrlSetting= cmdLine.getOptionValue("db-url", DEFAULT_DB_URL);
+        dbDriverSetting= cmdLine.getOptionValue("db-driver", DEFAULT_DB_DRIVER);
     }
 
     public short port() {
-        return (portSetting == null) ? DEFAULT_PORT : portSetting;
+        return portSetting;
     }
 
     public String hostname() {
-        return (hostnameSetting == null) ? DEFAULT_HOSTNAME : hostnameSetting;
+        return hostnameSetting;
     }
 
     public String dbDriver() {
-        return (dbDriverSetting == null) ? DEFAULT_DB_DRIVER : dbDriverSetting;
+        return dbDriverSetting;
     }
 
     public String dbUrl() {
-        return (dbUrlSetting == null) ? DEFAULT_DB_URL : dbUrlSetting;
+        return dbUrlSetting;
     }
 }
