@@ -14,12 +14,19 @@ public class ApplicationSettings {
 
     public ApplicationSettings(String[] args) throws ParseException {
         Options options= new Options();
+        options.addOption("h", false, "Displays this help screen");
         options.addOption("p", "port", true, "TCP port listening for connections");
         options.addOption("n", "hostname", true, "Hostname of the Jetty route");
         options.addOption(Option.builder().longOpt("db-url").argName("url").hasArg(true).desc("JDBC database url").required(false).build());
         options.addOption(Option.builder().longOpt("db-driver").argName("classname").hasArg(true).desc("JDBC driver classname").required(false).build());
 
         CommandLine cmdLine = new DefaultParser().parse( options, args);
+
+        if (cmdLine.hasOption("h")) {
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp("RemoteDataLocker [options]", options);
+            System.exit(0);
+        }
 
         portSetting= Short.parseShort(cmdLine.getOptionValue("p", DEFAULT_PORT));
         hostnameSetting= cmdLine.getOptionValue("hostname", DEFAULT_HOSTNAME);
